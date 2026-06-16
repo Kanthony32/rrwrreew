@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>No Promises — Dashboard HUD V10</title>
+<style>
+
+:root{
+  --bg:#06111f;
+  --bg2:#0a1626;
+  --panel:rgba(16,27,43,.72);
+  --panel-strong:rgba(12,22,36,.92);
+  --line:rgba(255,255,255,.10);
+  --line-strong:rgba(255,255,255,.18);
+  --text:#f7f8fb;
+  --muted:#9dacbf;
+  --orange:#ff7f32;
+  --gold:#ffc75f;
+  --green:#5fe4a5;
+  --red:#ff697f;
+  --blue:#77c4ff;
+  --purple:#bd9cff;
+  --shadow:0 22px 60px rgba(0,0,0,.28);
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{
+  margin:0;
+  color:var(--text);
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(89,143,255,.22), transparent 28%),
+    radial-gradient(circle at 100% 0%, rgba(255,127,50,.17), transparent 24%),
+    linear-gradient(180deg,#081220 0%,#07101d 32%,#050a13 100%);
+}
+body:before{
+  content:"";
+  position:fixed; inset:0;
+  background:
+    linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size: 100% 28px, 28px 100%;
+  mask-image: linear-gradient(180deg, rgba(0,0,0,.42), transparent 78%);
+  pointer-events:none; opacity:.22;
+}
+button,input,select{font:inherit}
+button{
+  cursor:pointer;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:10px 13px;
+  color:var(--text);
+  background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+  transition: all .16s ease;
+  backdrop-filter: blur(18px);
+}
+button:hover{transform:translateY(-1px); border-color:rgba(255,255,255,.24); box-shadow:0 12px 28px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.12)}
+button:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.primary{
+  color:#17100a;
+  font-weight:900;
+  border-color:rgba(255,200,120,.7);
+  background:linear-gradient(135deg, #ff7f32 0%, #ffb348 55%, #ffd67a 100%);
+  box-shadow:0 14px 30px rgba(255,127,50,.24), inset 0 1px 0 rgba(255,255,255,.28);
+}
+.danger{border-color:rgba(255,105,127,.45);color:#ffd9df}
+.app{max-width:1440px;margin:auto;padding:22px 20px 28px;position:relative;z-index:1}
+.top{
+  display:grid;
+  grid-template-columns:minmax(0,1.2fr) minmax(340px,.8fr);
+  gap:16px;
+  margin-bottom:16px;
+}
+.hero,.hero-meta,.stage,.card,.pill{
+  background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
+  border:1px solid var(--line);
+  box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,.08);
+  backdrop-filter: blur(22px) saturate(130%);
+}
+.hero{border-radius:28px; padding:26px 28px; position:relative; overflow:hidden}
+.hero:before{
+  content:""; position:absolute; right:-40px; top:-50px; width:220px; height:220px; border-radius:50%;
+  background:radial-gradient(circle, rgba(255,127,50,.30) 0%, rgba(255,127,50,0) 68%);
+}
+.hero:after{
+  content:""; position:absolute; left:-70px; bottom:-80px; width:260px; height:260px; border-radius:50%;
+  background:radial-gradient(circle, rgba(119,196,255,.18) 0%, rgba(119,196,255,0) 70%);
+}
+.hero h1{margin:0; font-size:44px; line-height:.98; letter-spacing:-.06em; font-weight:900}
+.hero .lead{max-width:720px; margin:10px 0 0; color:#d3dce8; font-size:15px; line-height:1.5}
+.hero-tags{display:flex; flex-wrap:wrap; gap:8px; margin-top:16px}
+.hero-meta{border-radius:28px; padding:18px; display:grid; gap:12px}
+.meta-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.meta-card{padding:14px; border-radius:18px; background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)); border:1px solid rgba(255,255,255,.08)}
+.meta-card b{display:block; font-size:27px; letter-spacing:-.05em}
+.meta-card span{color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.08em}
+.muted,small{color:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:8px 12px;color:#d5dce6;background:rgba(255,255,255,.05)}
+.nav{display:flex; flex-wrap:wrap; gap:8px; margin:14px 0 16px}
+.nav button.active{
+  background:linear-gradient(135deg,#15263d,#203757);
+  color:#fff; border-color:rgba(119,196,255,.35);
+  box-shadow:0 10px 24px rgba(80,120,255,.14), inset 0 1px 0 rgba(255,255,255,.14)
+}
+.stagebar{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.stage{border-radius:20px; padding:16px 18px; position:relative; overflow:hidden}
+.stage:after{content:""; position:absolute; inset:0; background:linear-gradient(90deg, transparent, rgba(255,255,255,.04), transparent); transform:translateX(-100%)}
+.stage.active{border-color:rgba(255,127,50,.55); background:linear-gradient(180deg, rgba(255,127,50,.16), rgba(255,255,255,.05));}
+.stage.active:after{transform:translateX(100%); transition:transform 1.25s ease}
+.stage b{font-size:16px; letter-spacing:-.02em}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+.card{
+  border-radius:24px;
+  padding:18px;
+  background:linear-gradient(180deg, rgba(255,255,255,.085), rgba(255,255,255,.035));
+}
+.s2{grid-column:span 2}.s3{grid-column:span 3}.s4{grid-column:span 4}.s5{grid-column:span 5}.s6{grid-column:span 6}.s7{grid-column:span 7}.s8{grid-column:span 8}.s12{grid-column:span 12}
+h2,h3{margin:0 0 12px; letter-spacing:-.04em}
+h2{font-size:24px}
+h3{font-size:16px; color:#eef3f8}
+.kpi{font-size:40px;font-weight:950;letter-spacing:-.07em;line-height:1}
+.bar{height:10px;background:rgba(255,255,255,.07);border-radius:999px;overflow:hidden;margin:6px 0 12px;border:1px solid rgba(255,255,255,.04)}
+.fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--gold));border-radius:999px;box-shadow:0 0 24px rgba(255,179,72,.25)}
+.fill.good{background:linear-gradient(90deg,#34d17f,#8bf3ba)}
+.fill.bad{background:linear-gradient(90deg,var(--red),#ffae73)}
+.row{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.tag{display:inline-flex;align-items:center;gap:5px;font-size:11px;margin:2px;padding:6px 9px;border-radius:999px;background:rgba(255,138,42,.12);border:1px solid rgba(255,138,42,.28);color:#ffd9b8; font-weight:700; letter-spacing:.02em}
+.green{background:rgba(88,228,165,.12);border-color:rgba(88,228,165,.26);color:#dbffeb}
+.blue{background:rgba(119,196,255,.12);border-color:rgba(119,196,255,.26);color:#dbf0ff}
+.red{background:rgba(255,105,127,.12);border-color:rgba(255,105,127,.25);color:#ffe0e5}
+.purple{background:rgba(189,156,255,.12);border-color:rgba(189,156,255,.26);color:#efe2ff}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{border-bottom:1px solid rgba(255,255,255,.06);padding:11px 10px;text-align:left;vertical-align:top}
+.table tr:hover td{background:rgba(255,255,255,.022)}
+.table th{font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.08em}
+.feed{display:grid;gap:10px}
+.item{background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:12px}
+.task{min-height:165px;display:flex;flex-direction:column;gap:10px}
+.cost{font-weight:900;color:#110c08;background:linear-gradient(135deg,var(--gold),#ffb13b);border-radius:999px;padding:5px 9px;font-size:12px; box-shadow: inset 0 1px 0 rgba(255,255,255,.35)}
+.bigPoints{display:grid;place-items:center;border:1px solid rgba(255,138,42,.32);background:radial-gradient(circle at 50% 35%,rgba(255,138,42,.22),rgba(255,255,255,.03));border-radius:28px;min-height:190px; position:relative; overflow:hidden}
+.bigPoints:before{content:""; position:absolute; inset:18px; border-radius:22px; border:1px solid rgba(255,255,255,.06)}
+.bigPoints b{font-size:66px;line-height:1;letter-spacing:-.09em; position:relative}
+.disabled{opacity:.45;filter:grayscale(.35)}
+.footer{margin-top:20px;text-align:center;font-size:12px;color:var(--muted)}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.select,.input{width:100%;border:1px solid rgba(255,255,255,.10);border-radius:14px;background:rgba(6,14,24,.78);color:var(--text);padding:12px 12px;margin:5px 0;box-shadow: inset 0 1px 0 rgba(255,255,255,.05)}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}.compact td,.compact th{padding:7px}.modal{position:fixed;inset:0;background:rgba(4,8,14,.72);display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px)}.modal.show{display:flex}.modal .box{max-width:900px;width:100%;max-height:90vh;overflow:auto}.close{float:right}
+hr{border:none; border-top:1px solid rgba(255,255,255,.08); margin:14px 0}
+/* V10 Dashboard / HUD Layer */
+.hud-grid{
+  display:grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(320px, .75fr);
+  gap:16px;
+  margin-bottom:16px;
+}
+.hud-main{
+  position:relative;
+  overflow:hidden;
+  min-height:320px;
+  border-radius:32px;
+  padding:22px;
+  background:
+    linear-gradient(135deg, rgba(255,127,50,.20), transparent 34%),
+    radial-gradient(circle at 82% 18%, rgba(119,196,255,.18), transparent 30%),
+    linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.035));
+  border:1px solid rgba(255,255,255,.13);
+  box-shadow:0 28px 80px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.10);
+}
+.hud-main:before{
+  content:"";
+  position:absolute;
+  inset:auto -15% -48% -15%;
+  height:290px;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:50%;
+  pointer-events:none;
+}
+.hud-main:after{
+  content:"";
+  position:absolute;
+  top:0; right:0; bottom:0;
+  width:42%;
+  background:
+    linear-gradient(90deg, transparent, rgba(255,255,255,.04)),
+    repeating-linear-gradient(135deg, rgba(255,255,255,.035) 0 1px, transparent 1px 10px);
+  mask-image:linear-gradient(90deg, transparent, black);
+  pointer-events:none;
+}
+.hud-content{position:relative; z-index:2}
+.hud-label{
+  display:inline-flex;
+  gap:8px;
+  align-items:center;
+  padding:7px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:800;
+  color:#ffe4c9;
+  background:rgba(255,127,50,.12);
+  border:1px solid rgba(255,127,50,.24);
+}
+.hud-title{
+  margin:14px 0 8px;
+  font-size:40px;
+  line-height:1;
+  letter-spacing:-.07em;
+}
+.hud-subtitle{
+  max-width:780px;
+  color:#d2dce9;
+  line-height:1.5;
+}
+.matchup{
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  gap:14px;
+  align-items:stretch;
+  margin-top:20px;
+}
+.team-panel{
+  border-radius:22px;
+  padding:16px;
+  border:1px solid rgba(255,255,255,.10);
+  background:linear-gradient(180deg, rgba(5,12,22,.55), rgba(255,255,255,.035));
+}
+.team-panel.away{
+  background:linear-gradient(180deg, rgba(19,31,49,.62), rgba(255,255,255,.035));
+}
+.team-name{
+  font-size:24px;
+  font-weight:950;
+  letter-spacing:-.05em;
+  margin:4px 0;
+}
+.team-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:10px;
+}
+.versus{
+  align-self:center;
+  display:grid;
+  place-items:center;
+  width:74px;
+  height:74px;
+  border-radius:24px;
+  font-weight:1000;
+  letter-spacing:-.08em;
+  color:#16100b;
+  background:linear-gradient(135deg, var(--orange), var(--gold));
+  box-shadow:0 18px 45px rgba(255,127,50,.24), inset 0 1px 0 rgba(255,255,255,.35);
+}
+.command-strip{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:10px;
+  margin-top:16px;
+}
+.command-tile{
+  padding:13px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.09);
+  background:rgba(255,255,255,.045);
+}
+.command-tile span{
+  display:block;
+  font-size:11px;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+.command-tile b{
+  display:block;
+  margin-top:3px;
+  font-size:24px;
+  line-height:1;
+  letter-spacing:-.06em;
+}
+.hud-side{
+  display:grid;
+  gap:14px;
+}
+.tp-orb{
+  position:relative;
+  overflow:hidden;
+  min-height:170px;
+  border-radius:30px;
+  display:grid;
+  place-items:center;
+  text-align:center;
+  border:1px solid rgba(255,127,50,.34);
+  background:
+    radial-gradient(circle at 50% 32%, rgba(255,127,50,.32), transparent 42%),
+    linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.035));
+  box-shadow:0 24px 70px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.10);
+}
+.tp-orb b{
+  display:block;
+  font-size:72px;
+  line-height:.9;
+  letter-spacing:-.10em;
+}
+.tp-orb span{
+  display:block;
+  color:var(--muted);
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  font-size:11px;
+}
+.hud-card-title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:10px;
+}
+.alert-grid{
+  display:grid;
+  gap:10px;
+}
+.alert{
+  border-radius:18px;
+  padding:12px;
+  border:1px solid rgba(255,255,255,.09);
+  background:linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.025));
+}
+.alert b{display:block; margin-bottom:3px}
+.alert small{line-height:1.35}
+.task-board{
+  margin-top:16px;
+}
+.task-board-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:end;
+  gap:12px;
+  margin-bottom:12px;
+}
+.task-board-header h2{margin:0}
+.feed-strip{
+  display:grid;
+  grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+  gap:16px;
+}
+.formula-list .row{
+  padding:6px 0;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.formula-list .row:last-child{border-bottom:0}
+.focus-list{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+}
+.focus-card{
+  border-radius:18px;
+  padding:12px;
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.035);
+}
+.focus-card b{display:block; font-size:20px; letter-spacing:-.04em}
+.focus-card span{color:var(--muted); font-size:12px}
+@media(max-width:1050px){
+  .hud-grid,.feed-strip{grid-template-columns:1fr}
+  .command-strip{grid-template-columns:repeat(2,1fr)}
+  .matchup{grid-template-columns:1fr}
+  .versus{width:100%; height:52px}
+  .focus-list{grid-template-columns:1fr}
+}
+
+@media(max-width:1100px){.top{grid-template-columns:1fr}.hero h1{font-size:38px}}
+@media(max-width:950px){.s2,.s3,.s4,.s5,.s6,.s7,.s8{grid-column:span 12}.stagebar{grid-template-columns:1fr}.app{padding:14px}.table{font-size:13px}.split,.meta-grid{grid-template-columns:1fr}.bigPoints{min-height:150px}.bigPoints b{font-size:52px}}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+  <div class="hero">
+    <div class="pill">Design Language · EA Sports × Apple</div>
+    <h1>No Promises</h1>
+    <div class="lead">A premium college basketball program simulator with the energy of an EA Sports control center and the clarity of an Apple-quality web app. Cleaner hierarchy, sharper surfaces, stronger typography, and a more modern command-center feel.</div>
+    <div class="hero-tags">
+      <span class="tag">Season Cycle</span>
+      <span class="tag blue">Coach Manager</span>
+      <span class="tag green">Task Point Economy</span>
+      <span class="tag purple">Dashboard HUD V10</span>
+    </div>
+  </div>
+  <div class="hero-meta">
+    <div class="pill">Visual Goals · Premium · Fast · Clear · Athletic</div>
+    <div class="meta-grid">
+      <div class="meta-card"><span>Build</span><b>V9</b></div>
+      <div class="meta-card"><span>System</span><b>3-Stage</b></div>
+      <div class="meta-card"><span>Season</span><b>12 Games</b></div>
+      <div class="meta-card"><span>Tone</span><b>EA × Apple</b></div>
+    </div>
+    <small>Sharper cards. Better contrast. More legible data. More “sports control room,” less raw prototype.</small>
+  </div>
+</div>
+<div class="stagebar" id="stagebar"></div>
+  <div class="nav" id="nav"></div>
+  <main id="main"></main>
+  <div class="footer">Local browser prototype. Fictional teams and players. Save data stays on this device.</div>
+</div>
+<div class="modal" id="modal"><div class="card box"><button class="close danger" onclick="closeModal()">Close</button><div id="modalBody"></div></div></div>
+<script>
+const clamp=n=>Math.max(0,Math.min(100,Math.round(n)));const avg=(a,k)=>a.length?a.reduce((s,x)=>s+(x[k]||0),0)/a.length:0;const pick=a=>a[Math.floor(Math.random()*a.length)];const rand=(a,b)=>Math.floor(a+Math.random()*(b-a+1));
+const first=['Aaliyah','Maya','Jada','Reagan','Skylar','Nia','Alina','Tessa','Morgan','Aniyah','Damiya','Bre','Lex','Galima','Saniya','Camryn','Kira','Naomi','Riley','Zara','Amara','Simone','Jordan','Kendall','Taylor','Mikayla','Jaliyah','Sage','Kennedy','Asha','Imani','London','Kori','Faith','Ari'];
+const last=['Ellis','Brooks','Reed','Carter','Thompson','King','Lee','West','Williams','Morgan','Harper','Sato','Johnson','Parker','Coleman','Davis','Wright','Nelson','Bailey','Harris','Moore','Grant','Reynolds','Scott','Young','Hill','Watson','Foster','Bell','Frazier'];
+const positions=['PG','G','W','F','C']; const traits=['Gym Rat','Quiet Leader','Alpha','Late Bloomer','Social Influencer','Film Junkie','Glue Player','Entitled Talent','Defensive Dog','Culture Builder','Raw Upside','High Motor','Shot Maker','Connector','Rim Runner'];
+const leagues={ACC:['Raleigh State','Durham Tech','Carolina Atlantic','Virginia Coast','Miami Metro','Louisville City','Clemson Hills','Atlanta Tech'],SEC:['Columbia Southern','Baton Rouge State','Knoxville U','Austin Republic','Athens State','Norman Plains','Gainesville U','Oxford College'],BigTen:['Columbus Central','College Park','Iowa City','Los Angeles West','Evanston U','Madison State','Ann Arbor U','Lincoln State'],Big12:['Waco Central','Fort Worth U','Manhattan Plains','Tucson Desert','Boulder Mountain','Lawrence State','Morgantown U','Tempe State'],Independent:['Storrs National','Spokane West','Philadelphia Catholic','South Bend Prep','Queens Academy','Vegas Elite','Provo Mountain','Milwaukee Jesuit']};
+function uid(){return (crypto.randomUUID?crypto.randomUUID():Math.random().toString(36).slice(2));}
+function makePlayer(forceYear, boost=0){let p=pick(positions),yr=forceYear||pick(['FR','SO','JR','SR']);let base={FR:64,SO:69,JR:73,SR:76}[yr]+rand(-5,9)+boost;let potential=clamp(base+rand(3,20));return {id:uid(),name:pick(first)+' '+pick(last),pos:p,yr,ovr:clamp(base),pot:potential,morale:rand(45,82),trust:rand(45,82),nil:rand(30,78),portal:rand(8,42),fatigue:rand(5,32),academics:rand(55,94),trait:pick(traits),dev:rand(35,90),loyalty:rand(35,90),injury:0,role:p==='PG'?'Primary creator':p==='C'?'Paint anchor':p==='F'?'Frontcourt connector':p==='W'?'Two-way wing':'Combo guard'} }
+function makeRecruit(){let p=pick(positions),cls=pick(['2027','2028','2029']);let ovr=rand(58,83),pot=clamp(ovr+rand(8,20));let fit=rand(45,95);let stars=ovr>78?5:ovr>72?4:ovr>66?3:2;return {id:uid(),name:pick(first)+' '+pick(last),pos:p,cls,stars,visible:`${Math.max(50,ovr-rand(3,9))}-${Math.min(95,ovr+rand(2,8))}`,ovr,pot,interest:rand(25,72),trust:rand(25,70),fit,family:rand(30,85),risk:rand(10,55),debt:0,scouted:0,hidden:false,concern:pick(['playing time','development plan','NIL visibility','distance from home','academic fit','staff stability','style of play','fear of being recruited over']),committed:false};}
+function makeTeam(name,league,user=false){let roster=[];let boost=league==='Independent'?rand(0,4):rand(-1,3);for(let i=0;i<10;i++)roster.push(makePlayer(null,boost));let rating=clamp(avg(roster,'ovr')+rand(-5,5));return {name,league,user,rating,prestige:rand(35,88),record:[0,0],net:rand(70,220),roster};}
+function makeWorld(){let teams=[];Object.entries(leagues).forEach(([lg,names])=>names.forEach(n=>teams.push(makeTeam(n,lg))));teams[0].name='Westview State';teams[0].user=true;teams[0].prestige=52;teams[0].roster=[makePlayer('SR',4),makePlayer('JR',5),makePlayer('JR',3),makePlayer('SO',5),makePlayer('FR',2),makePlayer('FR',0),makePlayer('SO',1),makePlayer('JR',0),makePlayer('SR',0),makePlayer('FR',-1)];teams[0].rating=clamp(avg(teams[0].roster,'ovr'));teams[0].net=118;return teams;}
+function buildSchedule(world){let user=userTeamFrom(world);let rivals=world.filter(t=>!t.user).sort(()=>Math.random()-.5);let same=rivals.filter(t=>t.league===user.league).slice(0,5);let others=rivals.filter(t=>t.league!==user.league).slice(0,7);return [...same,...others].sort(()=>Math.random()-.5).slice(0,12).map((t,i)=>({week:i+1,opponent:t.name,league:t.league,rating:t.rating,played:false,result:null,score:null,net:t.net}));}
+function userTeamFrom(w){return w.find(t=>t.user)}
+function start(){let world=makeWorld();let recruits=Array.from({length:36},makeRecruit).sort((a,b)=>b.pot-a.pot);return {view:'Stage',stage:'in-season',season:1,week:1,gameIndex:0,record:[0,0],tp:0,maxTP:0,q:[],prep:0,tourRound:0,tourneyActive:false,tourLost:false,natty:false,world,schedule:buildSchedule(world),recruits,commits:[],lastProgress:[],lastReport:'',log:['New dynasty started. Build the program. Earn the trust.'],program:{success:50,prestige:52,trust:66,culture:64,job:63,budget:72,staff:50,pressure:32,ad:58,boosters:54,nil:48,nilIntegrity:76,fan:57,academics:78},coach:{prestige:54,xp:420,level:3,ratings:{recruiting:58,development:60,tactics:56,culture:63,nil:54,politics:50}},leaders:JSON.parse(localStorage.np_v8_leaders||'[]')};}
+let S=load();function load(){try{return JSON.parse(localStorage.np_v8_build)||start()}catch(e){return start()}}function save(){localStorage.np_v8_build=JSON.stringify(S);localStorage.np_v8_leaders=JSON.stringify(S.leaders||[])}
+function userTeam(){return userTeamFrom(S.world)}function roster(){return userTeam().roster}function debt(){return S.recruits.reduce((a,r)=>a+r.debt,0)}
+function stageName(){return S.stage==='in-season'?'In-Season':S.stage==='post-season'?'Postseason':'Offseason'}
+function formula(){let p=S.program,c=S.coach,rt=roster();let rows=[['Base bandwidth',16],['Program success',Math.floor(p.success/12)],['Program prestige',Math.floor(p.prestige/16)],['Coach prestige',Math.floor(c.prestige/14)],['Staff quality',Math.floor(p.staff/18)],['Trust capital',Math.floor(p.trust/24)],['Budget stability',Math.floor(p.budget/28)],['Stage bonus',S.stage==='post-season'?3:S.stage==='off-season'?5:0],['Pressure penalty',-Math.floor(p.pressure/26)],['Fatigue penalty',-Math.floor(avg(rt,'fatigue')/34)],['Trust debt penalty',-Math.floor(debt()/18)]];let total=Math.max(10,Math.min(44,rows.reduce((a,r)=>a+r[1],0)));return{rows,total}}
+function newTurn(){let f=formula();S.maxTP=f.total;S.tp=f.total;S.q=[]}function ensure(){if(!S.maxTP)newTurn()}
+function log(x){S.log.push(x);if(S.log.length>40)S.log.shift()}function spend(cost,label,fn,stage=null){if(stage&&S.stage!==stage){log(`Wrong stage for ${label}.`);render();return}if(S.tp<cost){log(`Not enough TP for ${label}. Need ${cost}, have ${S.tp}.`);render();return}S.tp-=cost;S.q.push({label,cost});fn&&fn();log(`Task: ${label} (-${cost} TP).`);render()}
+function go(v){S.view=v;render()}function meter(label,val,bad=false){return `<small>${label}<b style="float:right">${Math.round(val)}</b></small><div class="bar"><div class="fill ${bad?'bad':val>70?'good':''}" style="width:${clamp(val)}%"></div></div>`}
+function task(name,cost,desc,call,tags='',stage=null){let d=S.tp<cost||(stage&&S.stage!==stage);return `<div class="card task ${d?'disabled':''}"><div class="row"><h3>${name}</h3><span class="cost">${cost} TP</span></div><div class="muted">${desc}</div><div>${tags}</div><button class="${d?'':'primary'}" onclick="${call}">${d?'Unavailable':'Spend Points'}</button></div>`}
+function drawShell(){document.getElementById('stagebar').innerHTML=['in-season','post-season','off-season'].map(st=>`<div class="stage ${S.stage===st?'active':''}"><b>${st==='in-season'?'In-Season':st==='post-season'?'Postseason':'Offseason'}</b><br><small>${st==='in-season'?'12-game schedule, practice, recruiting':st==='post-season'?'NCAA tournament, retention, media':'matriculation, recruiting class, new world'}</small></div>`).join('');const views=['Stage','Roster','Recruiting','Leagues','Schedule','Coach','Player Lab','Dynasty'];document.getElementById('nav').innerHTML=views.map(v=>`<button class="${S.view===v?'active':''}" onclick="go('${v}')">${v}</button>`).join('')+`<button class="primary" onclick="resolveTurn()">Resolve Turn</button><button class="danger" onclick="resetGame()">Reset</button>`}
+function seedProjection(){let score=clamp(S.record[0]*8-S.record[1]*3+(100-userTeam().net)/3+S.program.prestige/4+S.program.success/3);let label=score>=72?'Protected Seed':score>=58?'At-Large Team':score>=48?'Bubble Team':'Outside Looking In';return{score,label,detail:`Resume score ${score}. Record ${S.record[0]}-${S.record[1]}, NET ${userTeam().net}, prestige ${S.program.prestige}.`}}
+function Stage(){
+  let f=formula();
+  let next=S.schedule[S.gameIndex];
+  let seed=seedProjection();
+  let team=userTeam();
+  let topPortal=roster().slice().sort((a,b)=>b.portal-a.portal)[0];
+  let tired=roster().slice().sort((a,b)=>b.fatigue-a.fatigue)[0];
+  let target=S.recruits.filter(r=>!r.committed).sort((a,b)=>(b.fit+b.interest+b.trust-b.risk)-(a.fit+a.interest+a.trust-a.risk))[0];
+  let winProb=next&&S.stage==='in-season'?Math.round(gameChance(next.rating,false)):null;
+  let oppHtml = S.stage==='in-season' && next ? `
+    <div class="team-panel away">
+      <span class="tag blue">Next Opponent</span>
+      <div class="team-name">${next.opponent}</div>
+      <small>${next.league} · Rating ${next.rating} · NET ${next.net}</small>
+      <div class="team-meta">
+        <span class="tag">${winProb}% Win Prob.</span>
+        <span class="tag purple">Game ${S.gameIndex+1}/12</span>
+      </div>
+    </div>` : S.stage==='post-season' ? `
+    <div class="team-panel away">
+      <span class="tag blue">Postseason</span>
+      <div class="team-name">${S.tourneyActive&&!S.tourLost?'NCAA Tournament':'Review Window'}</div>
+      <small>${postStatus()}</small>
+      <div class="team-meta"><span class="tag">${seed.label}</span></div>
+    </div>` : `
+    <div class="team-panel away">
+      <span class="tag blue">Offseason HQ</span>
+      <div class="team-name">Roster Build</div>
+      <small>Matriculation · Recruiting class · New player generation</small>
+      <div class="team-meta"><span class="tag">Year ${S.season+1} Prep</span></div>
+    </div>`;
+  return `<section>
+    <div class="hud-grid">
+      <div class="hud-main">
+        <div class="hud-content">
+          <span class="hud-label">${stageName()} · Season ${S.season} · Week ${S.week}</span>
+          <h2 class="hud-title">Program Command Center</h2>
+          <div class="hud-subtitle">Make the week’s best tradeoffs: win the next game, protect the locker room, recruit honestly, manage pressure, and build enough trust to survive the season cycle.</div>
+          <div class="matchup">
+            <div class="team-panel">
+              <span class="tag green">Your Program</span>
+              <div class="team-name">${team.name}</div>
+              <small>${team.league} · Rating ${team.rating} · NET ${team.net}</small>
+              <div class="team-meta">
+                <span class="tag">${S.record[0]}-${S.record[1]}</span>
+                <span class="tag">Prestige ${S.program.prestige}</span>
+                <span class="tag">Job ${S.program.job}</span>
+              </div>
+            </div>
+            <div class="versus">${S.stage==='in-season'?'VS':S.stage==='post-season'?'M':'OS'}</div>
+            ${oppHtml}
+          </div>
+          <div class="command-strip">
+            <div class="command-tile"><span>Record</span><b>${S.record[0]}-${S.record[1]}</b></div>
+            <div class="command-tile"><span>Team Rating</span><b>${team.rating}</b></div>
+            <div class="command-tile"><span>Trust Debt</span><b>${debt()}</b></div>
+            <div class="command-tile"><span>Resume</span><b>${seed.score}</b></div>
+            <div class="command-tile"><span>Coach Prestige</span><b>${S.coach.prestige}</b></div>
+          </div>
+        </div>
+      </div>
+      <div class="hud-side">
+        <div class="tp-orb"><div><b>${S.tp}</b><span>Task Points Left</span><small>${S.maxTP} weekly budget</small></div></div>
+        <div class="card">
+          <div class="hud-card-title"><h3>Stage Alerts</h3><span class="tag">${seed.label}</span></div>
+          <div class="alert-grid">
+            <div class="alert"><b>Selection Watch</b><small>${seed.detail}</small></div>
+            <div class="alert"><b>Portal Watch</b><small>${topPortal?`${topPortal.name}: ${topPortal.portal}% risk`:'No portal risk'}</small></div>
+            <div class="alert"><b>Fatigue Watch</b><small>${tired?`${tired.name}: ${tired.fatigue} fatigue`:'Roster fresh'}</small></div>
+            <div class="alert"><b>Recruiting Priority</b><small>${target?`${target.name}: ${target.pos}, fit ${target.fit}, trust ${target.trust}`:'No active target'}</small></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card s4 formula-list">
+        <div class="hud-card-title"><h3>Point Formula</h3><span class="tag">${S.maxTP} TP</span></div>
+        ${f.rows.map(r=>`<div class="row"><small>${r[0]}</small><b>${r[1]>0?'+':''}${r[1]}</b></div>`).join('')}
+      </div>
+      <div class="card s4">
+        <div class="hud-card-title"><h3>Program Signals</h3><span class="tag blue">Live</span></div>
+        ${meter('Trust',S.program.trust)}
+        ${meter('Culture',S.program.culture)}
+        ${meter('Job Security',S.program.job)}
+        ${meter('Pressure',S.program.pressure,true)}
+      </div>
+      <div class="card s4">
+        <div class="hud-card-title"><h3>Focus Board</h3><span class="tag green">This Week</span></div>
+        <div class="focus-list">
+          <div class="focus-card"><span>Next Game</span><b>${next&&S.stage==='in-season'?next.opponent:'—'}</b></div>
+          <div class="focus-card"><span>Postseason</span><b>${S.stage==='post-season'?postStatus().split('<br>')[0]:seed.label}</b></div>
+          <div class="focus-card"><span>Top Recruit</span><b>${target?target.name:'—'}</b></div>
+          <div class="focus-card"><span>Roster Issue</span><b>${topPortal?topPortal.name:'—'}</b></div>
+        </div>
+      </div>
+      <div class="card s12 task-board">
+        <div class="task-board-header">
+          <div><h2>Coach Task Board</h2><small>Only stage-appropriate actions are available. Spend points before resolving the turn.</small></div>
+          <button class="primary" onclick="resolveTurn()">Resolve Turn</button>
+        </div>
+        <div class="grid">${stageTasks()}</div>
+      </div>
+      <div class="feed-strip s12">
+        <div class="card">
+          <h3>Completed This Turn</h3>
+          <div class="feed">${S.q.length?S.q.map(t=>`<div class="item">${t.label||t.name||'Task'} <span class="tag">${t.cost||''} TP</span></div>`).join(''):'<div class="item">No tasks completed yet. Spend wisely.</div>'}</div>
+        </div>
+        <div class="card">
+          <h3>Program Feed</h3>
+          <div class="feed">${S.log.slice(-8).reverse().map(x=>`<div class="item">${x}</div>`).join('')}</div>
+        </div>
+      </div>
+    </div>
+  </section>`
+}
+function stageTasks(){if(S.stage==='in-season')return `${task('Game Prep',6,'Scout opponent, install game plan, improve win probability.',"gamePrep()",'<span class="tag green">Winning</span>','in-season')}${task('Practice Block',5,'Improve team development but add fatigue.',"practiceBlock()",'<span class="tag blue">Development</span>','in-season')}${task('Recruiting Touches',4,'Contact top targets and build trust.',"massRecruit()",'<span class="tag">Recruiting</span>','in-season')}${task('Player Meetings',5,'Lower portal risk and raise trust.',"retentionPush()",'<span class="tag purple">Culture</span>','in-season')}`;if(S.stage==='post-season')return `${task('Tournament Scout',6,'Prepare for NCAA opponent or postseason review.',"gamePrep()",'<span class="tag green">March</span>','post-season')}${task('Recovery + Film',5,'Lower fatigue before tournament games.',"recoveryFilm()",'<span class="tag blue">Recovery</span>','post-season')}${task('Retention Meetings',6,'Protect roster before portal window.',"retentionPush()",'<span class="tag purple">Retention</span>','post-season')}${task('Media Discipline',4,'Improve public narrative and lower pressure.',"mediaDiscipline()",'<span class="tag">PR</span>','post-season')}`;return `${task('Run Matriculation',7,'Advance years, graduate seniors, progress/regress players.',"offseason('matriculate')",'<span class="tag green">Required</span>','off-season')}${task('Sign Recruiting Class',8,'Move committed recruits onto next roster.',"offseason('sign')",'<span class="tag">Recruiting</span>','off-season')}${task('Generate New World',4,'Refresh recruit class and AI rosters.',"offseason('generate')",'<span class="tag blue">World</span>','off-season')}${task('Staff / Coach Clinic',6,'Improve coach ratings and program staff.',"offseason('staff')",'<span class="tag purple">Growth</span>','off-season')}`}
+function Roster(){let rows=roster().sort((a,b)=>b.ovr-a.ovr).map((p,i)=>`<tr><td><b>${p.name}</b><br><small>${p.yr} · ${p.pos} · ${p.trait}</small></td><td>${p.ovr}/${p.pot||''}</td><td>${p.morale}</td><td>${p.trust}</td><td>${p.nil}</td><td>${p.academics||70}</td><td>${p.fatigue}</td><td>${p.portal}%</td><td>${p.injury?'<span class="tag red">hurt</span>':'healthy'}</td><td><button onclick="playerTask('${p.id}','role')">Role · 4</button> <button onclick="playerTask('${p.id}','dev')">Dev · 5</button> <button onclick="playerTask('${p.id}','nil')">NIL · 4</button> <button onclick="playerTask('${p.id}','rec')">Recovery · 3</button></td></tr>`).join('');return `<section class="grid"><div class="card s12"><h2>Roster</h2><p class="muted">Players matriculate every offseason. Returners can progress or regress based on potential, development profile, morale, fatigue, culture and your development rating.</p><table class="table"><tr><th>Player</th><th>OVR/POT</th><th>Morale</th><th>Trust</th><th>NIL</th><th>Acad.</th><th>Fatigue</th><th>Portal</th><th>Status</th><th>Tasks</th></tr>${rows}</table></div><div class="card s12"><h3>Last Offseason Progression</h3><div class="feed">${(S.lastProgress||[]).slice(-10).map(x=>`<div class="item">${x}</div>`).join('')||'<div class="item">No matriculation yet.</div>'}</div></div></section>`}
+function playerTask(id,t){let p=roster().find(x=>x.id===id);let c={role:4,dev:5,nil:4,rec:3}[t];spend(c,`${t} task for ${p.name}`,()=>{if(t==='role'){p.trust=clamp(p.trust+9);p.morale=clamp(p.morale+6);p.portal=clamp(p.portal-9);S.program.trust=clamp(S.program.trust+2)}if(t==='dev'){p.ovr=clamp(p.ovr+1);p.morale=clamp(p.morale+3);p.fatigue=clamp(p.fatigue+4);S.program.success=clamp(S.program.success+1);S.coach.ratings.development=clamp(S.coach.ratings.development+1)}if(t==='nil'){p.nil=clamp(p.nil+10);p.portal=clamp(p.portal-6);S.program.nil=clamp(S.program.nil-2);S.program.nilIntegrity=clamp(S.program.nilIntegrity+1)}if(t==='rec'){p.fatigue=clamp(p.fatigue-18);p.morale=clamp(p.morale+2)}})}
+function needsHtml(){let counts={PG:0,G:0,W:0,F:0,C:0};roster().forEach(p=>counts[p.pos]++);return Object.entries(counts).map(([k,v])=>`<div class="row"><small>${k}</small><b>${v}</b></div>`).join('')}
+function Recruiting(){let list=S.recruits.filter(r=>!r.committed).sort((a,b)=>b.stars-a.stars||b.fit-a.fit).slice(0,24);return `<section class="grid"><div class="card s8"><h2>Recruiting Board</h2><p class="muted">New recruiting classes generate in the offseason. Scouting narrows uncertainty; offers are stronger when trust + fit + interest beat risk.</p><table class="table compact"><tr><th>Recruit</th><th>Stars</th><th>Visible OVR</th><th>Trust</th><th>Interest</th><th>Fit</th><th>Risk</th><th>Debt</th><th>Tasks</th></tr>${list.map(r=>`<tr><td><b>${r.name}</b><br><small>${r.cls} · ${r.pos} · ${r.concern}</small></td><td>${'★'.repeat(r.stars)}</td><td>${r.scouted>=2?r.ovr:r.visible}</td><td>${r.trust}</td><td>${r.interest}</td><td>${r.fit}</td><td>${r.risk}</td><td>${r.debt}</td><td><button onclick="recruitTask('${r.id}','scout')">Scout · 3</button> <button onclick="recruitTask('${r.id}','call')">Call · 4</button> <button onclick="recruitTask('${r.id}','plan')">Plan · 6</button> <button onclick="recruitTask('${r.id}','offer')">Offer · 8</button></td></tr>`).join('')}</table></div><div class="card s4"><h2>Committed Class</h2><div class="feed">${S.commits.map(r=>`<div class="item"><b>${r.name}</b><br><small>${r.pos} · ${r.cls} · ${'★'.repeat(r.stars)} · OVR ${r.ovr} · POT ${r.pot}</small></div>`).join('')||'<div class="item">No commits yet.</div>'}</div><hr style="border-color:var(--line)"><h3>Roster Needs</h3>${needsHtml()}</div></section>`}
+function recruitTask(id,t){let r=S.recruits.find(x=>x.id===id);let c={scout:3,call:4,plan:6,offer:8}[t];spend(c,`${t} ${r.name}`,()=>{if(t==='scout'){r.scouted=clamp(r.scouted+1);r.trust=clamp(r.trust+2);S.coach.ratings.recruiting=clamp(S.coach.ratings.recruiting+1)}if(t==='call'){r.trust=clamp(r.trust+7);r.family=clamp(r.family+3);r.hidden=true}if(t==='plan'){r.trust=clamp(r.trust+10);r.interest=clamp(r.interest+5);r.fit=clamp(r.fit+3);r.risk=clamp(r.risk-5);r.debt=clamp(r.debt-4)}if(t==='offer'){let score=r.trust+r.interest+r.fit-r.risk-r.debt+S.coach.ratings.recruiting/2;if(score>145){r.committed=true;S.commits.push(r);S.program.prestige=clamp(S.program.prestige+r.stars);S.coach.ratings.recruiting=clamp(S.coach.ratings.recruiting+2);log(`${r.name} committed.`)}else{r.interest=clamp(r.interest+5);r.debt=clamp(r.debt+(r.trust<45?5:0));log(`${r.name} did not commit yet. Score ${Math.round(score)}.`)}}})}
+function Leagues(){return `<section class="grid">${Object.keys(leagues).map(lg=>`<div class="card s6"><h2>${lg}</h2><table class="table compact"><tr><th>Team</th><th>Rating</th><th>Prestige</th><th>NET</th><th>Record</th></tr>${S.world.filter(t=>t.league===lg).sort((a,b)=>b.record[0]-a.record[0]||b.rating-a.rating).map(t=>`<tr><td><b>${t.name}</b>${t.user?' <span class="tag green">YOU</span>':''}</td><td>${t.rating}</td><td>${t.prestige}</td><td>${t.net}</td><td>${t.record[0]}-${t.record[1]}</td></tr>`).join('')}</table></div>`).join('')}</section>`}
+function Schedule(){let seed=seedProjection();return `<section class="grid"><div class="card s8"><h2>12-Game Schedule</h2><table class="table"><tr><th>Game</th><th>Opponent</th><th>League</th><th>Rating</th><th>NET</th><th>Status</th></tr>${S.schedule.map((g,i)=>`<tr><td>${i+1}</td><td><b>${g.opponent}</b></td><td>${g.league}</td><td>${g.rating}</td><td>${g.net}</td><td>${g.played?`${g.result} · ${g.score}`:i===S.gameIndex&&S.stage==='in-season'?'<span class="tag">Next</span>':'Pending'}</td></tr>`).join('')}</table></div><div class="card s4"><h2>NCAA Selection Watch</h2><div class="item"><b>${seed.label}</b><br><small>${seed.detail}</small></div>${meter('Tournament Resume',seed.score)}${meter('Program Success',S.program.success)}${meter('Prestige',S.program.prestige)}<h3>Postseason</h3><div class="feed"><div class="item">${postStatus()}</div></div></div></section>`}
+function postStatus(){if(S.stage==='in-season')return 'Regular season in progress.'; if(!S.tourneyActive)return 'No NCAA bid. Retention and review period.'; if(S.natty)return 'National Champions.'; if(S.tourLost)return 'Eliminated from NCAA Tournament.'; return ['First Round','Second Round','Sweet 16','Elite 8','Final Four','National Championship'][S.tourRound]||'Tournament complete.'}
+function Coach(){let r=S.coach.ratings;return `<section class="grid"><div class="card s6"><h2>Coach Ratings</h2>${meter('Recruiting',r.recruiting)}${meter('Development',r.development)}${meter('Tactics',r.tactics)}${meter('Culture',r.culture)}${meter('NIL',r.nil)}${meter('Politics',r.politics)}</div><div class="card s6"><h2>Coach Growth</h2><p class="muted">Ratings now move up and down from outcomes. Wins improve tactics/prestige. Player growth improves development. Trust debt hurts recruiting and culture. NIL discipline matters.</p><div class="grid"><div class="card s4"><div class="kpi">${S.coach.level}</div><small>Level</small></div><div class="card s4"><div class="kpi">${S.coach.xp}</div><small>XP</small></div><div class="card s4"><div class="kpi">${S.coach.prestige}</div><small>Prestige</small></div></div><button onclick="coachClinic()">Mini Clinic · 5 TP</button></div></section>`}
+function PlayerLab(){let samples=Array.from({length:5},()=>makePlayer());let recruits=Array.from({length:5},()=>makeRecruit());return `<section class="grid"><div class="card s6"><h2>Player Creation Engine</h2><p class="muted">This engine creates rosters, AI teams, and recruiting classes. Players include position, year, OVR, potential, morale, trust, NIL, academics, trait, development profile and loyalty.</p><button class="primary" onclick="showGenerated('players')">Generate Player Sample</button> <button onclick="addWalkOn()">Add Random Walk-On</button><div class="feed">${samples.map(p=>`<div class="item"><b>${p.name}</b> · ${p.yr} ${p.pos}<br><small>OVR ${p.ovr} · POT ${p.pot} · ${p.trait} · Dev ${p.dev} · Loyalty ${p.loyalty}</small></div>`).join('')}</div></div><div class="card s6"><h2>Recruit Creation Engine</h2><button class="primary" onclick="regenRecruits()">Regenerate Recruit Pool · 4 TP</button><div class="feed">${recruits.map(r=>`<div class="item"><b>${r.name}</b> · ${r.cls} ${r.pos} · ${'★'.repeat(r.stars)}<br><small>Visible ${r.visible} · Actual OVR ${r.ovr} · POT ${r.pot} · Concern: ${r.concern}</small></div>`).join('')}</div></div></section>`}
+function Dynasty(){let score=Math.round(S.program.success+S.program.prestige+S.program.trust+S.program.job+S.coach.prestige+S.record[0]*8-S.record[1]*5-debt());return `<section class="grid"><div class="card s8"><h2>Dynasty Controls</h2><p class="muted">The intended cycle is: In-season 12 games → Postseason tournament/review → Offseason matriculation/recruiting → New Season.</p><div class="grid"><div class="card s3"><div class="kpi">${S.season}</div><small>Season</small></div><div class="card s3"><div class="kpi">${score}</div><small>Coach Score</small></div><div class="card s3"><div class="kpi">${S.commits.length}</div><small>Commits</small></div><div class="card s3"><div class="kpi">${S.recruits.filter(r=>!r.committed).length}</div><small>Recruit Pool</small></div></div><br><button onclick="saveScore()">Save Score</button> <button class="primary" onclick="forceNextStage()">Force Next Stage</button> <button onclick="exportSave()">Export Save</button> <button onclick="importSave()">Import Save</button><input id="saveCode" class="input mono" placeholder="Save code appears here / paste code here"></div><div class="card s4"><h3>Local Leaderboard</h3><div class="feed">${S.leaders.map(l=>`<div class="item"><b>${l.score}</b> — ${l.label}</div>`).join('')||'<div class="item">No saved scores yet.</div>'}</div></div><div class="card s12"><h3>Last Season Report</h3><div class="item">${S.lastReport||'No full season completed yet.'}</div></div></section>`}
+function gamePrep(){spend(6,'game prep',()=>{S.prep=clamp(S.prep+14);S.coach.ratings.tactics=clamp(S.coach.ratings.tactics+1)},S.stage==='in-season'?'in-season':'post-season')}
+function practiceBlock(){spend(5,'practice block',()=>{roster().forEach(p=>{p.ovr=clamp(p.ovr+(p.dev>55?1:0));p.fatigue=clamp(p.fatigue+5);p.morale=clamp(p.morale+2)});S.program.success=clamp(S.program.success+1);S.coach.ratings.development=clamp(S.coach.ratings.development+1)},'in-season')}
+function recoveryFilm(){spend(5,'recovery + film',()=>{roster().forEach(p=>p.fatigue=clamp(p.fatigue-16));S.prep=clamp(S.prep+6)},'post-season')}
+function mediaDiscipline(){spend(4,'media discipline',()=>{S.program.pressure=clamp(S.program.pressure-8);S.program.fan=clamp(S.program.fan+3);S.coach.ratings.politics=clamp(S.coach.ratings.politics+1)},'post-season')}
+function massRecruit(){spend(4,'mass recruiting touches',()=>{S.recruits.filter(r=>!r.committed).sort((a,b)=>b.fit-b.risk-(a.fit-a.risk)).slice(0,5).forEach(r=>{r.interest=clamp(r.interest+3);r.trust=clamp(r.trust+2)});S.coach.ratings.recruiting=clamp(S.coach.ratings.recruiting+1)},'in-season')}
+function retentionPush(){spend(6,'retention meetings',()=>{roster().forEach(p=>{p.trust=clamp(p.trust+6);p.portal=clamp(p.portal-10);p.morale=clamp(p.morale+4)});S.program.trust=clamp(S.program.trust+3);S.coach.ratings.culture=clamp(S.coach.ratings.culture+1)},'post-season')}
+function coachClinic(){spend(5,'coach clinic',()=>{let keys=Object.keys(S.coach.ratings);keys.forEach(k=>S.coach.ratings[k]=clamp(S.coach.ratings[k]+rand(0,2)));S.coach.xp+=60;S.coach.level=Math.floor(S.coach.xp/250)+1;log('Clinic completed. Coach ratings improved slightly.')})}
+function regenRecruits(){spend(4,'regenerate recruit pool',()=>{S.recruits=Array.from({length:36},makeRecruit).sort((a,b)=>b.pot-a.pot);log('Fresh recruit pool generated.')})}
+function addWalkOn(){let p=makePlayer('FR',-8);roster().push(p);userTeam().rating=clamp(avg(roster(),'ovr'));log(`${p.name} joined as a walk-on.`);render()}
+function showGenerated(){let p=makePlayer();openModal(`<h2>Generated Player</h2><div class="item"><b>${p.name}</b> · ${p.yr} ${p.pos}<br>OVR ${p.ovr} · POT ${p.pot} · ${p.trait}<br><small>Morale ${p.morale} · Trust ${p.trust} · NIL ${p.nil} · Academics ${p.academics} · Dev ${p.dev} · Loyalty ${p.loyalty}</small></div>`)}
+function gameChance(opRating,tourney=false){let team=avg(roster(),'ovr'),coach=(S.coach.ratings.tactics+S.coach.ratings.culture)/2;let fatigue=avg(roster(),'fatigue');let base=50+(team-opRating)*1.8+(S.prep/2)+(coach-55)/5+(S.program.culture-60)/8-fatigue/4-S.program.pressure/12;if(tourney)base-=4;return Math.max(8,Math.min(92,base));}
+function simAIWeek(){S.world.filter(t=>!t.user).forEach(t=>{let opp=pick(S.world.filter(x=>x.name!==t.name));let chance=50+(t.rating-opp.rating)*2+(t.prestige-opp.prestige)/20;let won=Math.random()*100<chance;if(won)t.record[0]++;else t.record[1]++;t.net=clamp(t.net+(won?-rand(1,8):rand(1,10)));})}
+function playGame(){let g=S.schedule[S.gameIndex];if(!g){S.stage='post-season';newTurn();return}let chance=gameChance(g.rating,false);let won=Math.random()*100<chance;let us=rand(58,88)+(won?rand(4,14):0),them=rand(58,88)+(won?0:rand(4,14));g.played=true;g.result=won?'W':'L';g.score=`${us}-${them}`;if(won){S.record[0]++;userTeam().record[0]++;S.program.success=clamp(S.program.success+5);S.program.fan=clamp(S.program.fan+4);S.program.job=clamp(S.program.job+3);S.program.prestige=clamp(S.program.prestige+2);S.coach.prestige=clamp(S.coach.prestige+1);S.coach.ratings.tactics=clamp(S.coach.ratings.tactics+1);userTeam().net=clamp(userTeam().net-rand(5,14));log(`Win over ${g.opponent}. Win probability ${Math.round(chance)}%.`)}else{S.record[1]++;userTeam().record[1]++;S.program.success=clamp(S.program.success-4);S.program.fan=clamp(S.program.fan-4);S.program.job=clamp(S.program.job-5);S.program.pressure=clamp(S.program.pressure+5);S.coach.ratings.tactics=clamp(S.coach.ratings.tactics-1);userTeam().net=clamp(userTeam().net+rand(6,18));log(`Loss to ${g.opponent}. Win probability ${Math.round(chance)}%.`)}S.gameIndex++;simAIWeek();roster().forEach(p=>{p.fatigue=clamp(p.fatigue+rand(5,11)); if(p.fatigue>72){p.morale=clamp(p.morale-5);p.portal=clamp(p.portal+6)} }); if(S.gameIndex>=12){S.stage='post-season';S.week=1;S.tourRound=0;S.tourneyActive=qualifies();S.tourLost=!S.tourneyActive;S.natty=false;log(S.tourneyActive?'Selection Sunday: you qualified for the NCAA Tournament.':'Selection Sunday: you missed the NCAA Tournament. Postseason becomes retention/review.');}else{S.week++;}S.prep=0;newTurn();}
+function qualifies(){let seed=seedProjection();return S.record[0]>=7||seed.score>=58}
+function playTournament(){if(!S.tourneyActive||S.tourLost||S.natty){S.stage='off-season';S.week=1;newTurn();log('Postseason ended. Offseason opened.');return}let names=['First Round','Second Round','Sweet 16','Elite 8','Final Four','National Championship'];let op=rand(72,92)+S.tourRound*2;let chance=gameChance(op,true);let won=Math.random()*100<chance;if(won){S.record[0]++;S.program.success=clamp(S.program.success+6);S.program.prestige=clamp(S.program.prestige+5);S.coach.prestige=clamp(S.coach.prestige+3);S.coach.ratings.tactics=clamp(S.coach.ratings.tactics+2);log(`NCAA ${names[S.tourRound]} win. Chance ${Math.round(chance)}%.`);S.tourRound++;if(S.tourRound>=6){S.natty=true;S.program.prestige=clamp(S.program.prestige+15);S.coach.prestige=clamp(S.coach.prestige+10);log('National Championship won. Program prestige surges.')}}else{S.record[1]++;S.tourLost=true;S.program.prestige=clamp(S.program.prestige+S.tourRound*2);S.coach.prestige=clamp(S.coach.prestige+S.tourRound);log(`NCAA ${names[S.tourRound]} loss. Tournament run ends.`)}S.week++;S.prep=0;newTurn();}
+function resolveTurn(){if(S.stage==='in-season')playGame();else if(S.stage==='post-season'){if(S.tourneyActive&&!S.tourLost&&!S.natty)playTournament();else{S.stage='off-season';S.week=1;newTurn();log('Postseason review complete. Offseason is open.')}}else{log('Offseason turn resolved. Use offseason tasks, then start the next season from Dynasty.');S.week++;newTurn();}render()}
+function offseason(t){let c={matriculate:7,sign:8,generate:4,staff:6}[t];spend(c,t,()=>{if(t==='matriculate')matriculate();if(t==='sign')signClass();if(t==='generate')generateWorld();if(t==='staff'){S.program.staff=clamp(S.program.staff+8);S.coach.ratings.development=clamp(S.coach.ratings.development+2);S.coach.ratings.recruiting=clamp(S.coach.ratings.recruiting+1);S.coach.ratings.politics=clamp(S.coach.ratings.politics+1);S.coach.xp+=60}},'off-season')}
+function matriculate(){let old=roster().slice();let newRoster=[];S.lastProgress=[];old.forEach(p=>{if(p.yr==='SR'){S.lastProgress.push(`${p.name} graduated.`);return}let yr={FR:'SO',SO:'JR',JR:'SR'}[p.yr]||p.yr;let growthBase=(p.pot||p.ovr+8)-p.ovr;let change=Math.round((growthBase/8)+(p.dev-50)/40+(S.coach.ratings.development-55)/22+(p.morale-60)/35-(p.fatigue/60));change+=rand(-2,2);let before=p.ovr;p.ovr=clamp(p.ovr+change);p.yr=yr;p.fatigue=clamp(rand(8,28));p.portal=clamp(p.portal + (p.trust<55?rand(4,12):rand(-8,4)));p.morale=clamp(p.morale+rand(-5,7));S.lastProgress.push(`${p.name}: ${before} → ${p.ovr} (${change>=0?'+':''}${change}), now ${yr}.`);newRoster.push(p);});userTeam().roster=newRoster;userTeam().rating=clamp(avg(newRoster,'ovr'));S.coach.ratings.development=clamp(S.coach.ratings.development+(avg(newRoster,'ovr')>75?1:-1));log('Matriculation complete. Players advanced, improved or regressed.');}
+function signClass(){let signed=S.commits.splice(0);signed.forEach(r=>{userTeam().roster.push({id:r.id,name:r.name,pos:r.pos,yr:'FR',ovr:r.ovr,pot:r.pot,morale:rand(52,78),trust:r.trust,nil:rand(35,72),portal:rand(8,32),fatigue:rand(5,20),academics:rand(55,95),trait:pick(traits),dev:rand(40,92),loyalty:rand(35,90),role:'Incoming freshman',injury:0});log(`${r.name} joined the roster as a freshman.`);});if(!signed.length)log('No commits to sign. Recruiting class was empty.');S.coach.ratings.recruiting=clamp(S.coach.ratings.recruiting+(signed.length?1:-1));userTeam().rating=clamp(avg(roster(),'ovr'));}
+function generateWorld(){S.recruits=Array.from({length:36},makeRecruit).sort((a,b)=>b.pot-a.pot);S.world.forEach(t=>{if(!t.user){t.roster=t.roster.filter(p=>p.yr!=='SR').map(p=>{p.yr={FR:'SO',SO:'JR',JR:'SR'}[p.yr]||p.yr;p.ovr=clamp(p.ovr+rand(-1,3));return p});while(t.roster.length<10)t.roster.push(makePlayer('FR'));t.rating=clamp(avg(t.roster,'ovr')+rand(-3,3));t.record=[0,0];t.net=rand(60,240);}});log('New recruit class and AI rosters generated.');}
+function forceNextStage(){if(S.stage==='in-season'){S.gameIndex=12;S.stage='post-season';S.tourneyActive=qualifies();S.tourLost=!S.tourneyActive;S.week=1;newTurn();log('Forced postseason.')}else if(S.stage==='post-season'){S.stage='off-season';S.week=1;newTurn();log('Forced offseason.')}else{seasonReport();S.season++;S.stage='in-season';S.week=1;S.gameIndex=0;S.record=[0,0];S.prep=0;S.schedule=buildSchedule(S.world);userTeam().record=[0,0];userTeam().rating=clamp(avg(roster(),'ovr'));newTurn();log('New season started with fresh 12-game schedule.')}}
+function seasonReport(){S.lastReport=`Season ${S.season}: ${S.record[0]}-${S.record[1]}, ${S.tourneyActive?'NCAA bid':'missed NCAA'}, ${S.natty?'National Champion. ':''}Prestige ${S.program.prestige}, Job Security ${S.program.job}, Trust Debt ${debt()}.`;S.coach.xp+=100+S.record[0]*12+(S.natty?250:0);S.coach.level=Math.floor(S.coach.xp/250)+1;if(debt()>30){S.coach.ratings.culture=clamp(S.coach.ratings.culture-2);S.coach.ratings.recruiting=clamp(S.coach.ratings.recruiting-2)}}
+function saveScore(){let score=Math.round(S.program.success+S.program.prestige+S.program.trust+S.program.job+S.coach.prestige+S.record[0]*8-S.record[1]*5-debt());S.leaders.push({score,label:`S${S.season} ${stageName()} ${S.record[0]}-${S.record[1]}`});S.leaders.sort((a,b)=>b.score-a.score);save();render()}
+function exportSave(){document.getElementById('saveCode').value=btoa(unescape(encodeURIComponent(JSON.stringify(S))))}
+function importSave(){let code=document.getElementById('saveCode').value.trim();try{S=JSON.parse(decodeURIComponent(escape(atob(code))));log('Save imported.');render()}catch(e){alert('Bad save code.')}}
+function openModal(html){document.getElementById('modalBody').innerHTML=html;document.getElementById('modal').classList.add('show')}function closeModal(){document.getElementById('modal').classList.remove('show')}
+function resetGame(){if(confirm('Reset season-cycle V8 save?')){localStorage.removeItem('np_v8_build');S=start();newTurn();render()}}
+function render(){ensure();drawShell();document.getElementById('main').innerHTML=({Stage,Roster,Recruiting,Leagues,Schedule,Coach,'Player Lab':PlayerLab,Dynasty})[S.view]();save()}
+render();
+</script>
+</body></html>
