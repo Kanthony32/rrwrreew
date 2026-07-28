@@ -3,26 +3,48 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>No Promises V28 Mobile</title>
+<meta name="theme-color" content="#07101d">
+<title>No Promises — Loading V28.3 Beta</title>
 <style>
-:root{--bg:#07101d;--card:rgba(255,255,255,.075);--line:rgba(255,255,255,.14);--text:#f7f8fb;--muted:#9dacbf;--orange:#ff7f32;--gold:#ffc75f;--green:#5fe4a5;--blue:#77c4ff;--red:#ff697f}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 10% 0,rgba(119,196,255,.2),transparent 28%),radial-gradient(circle at 100% 0,rgba(255,127,50,.2),transparent 26%),linear-gradient(180deg,#081220,#050a13);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,Inter,Segoe UI,sans-serif;padding:14px 14px 86px}h1{font-size:42px;line-height:.92;letter-spacing:-.08em;margin:8px 0 10px}h2{font-size:22px;letter-spacing:-.05em;margin:0 0 10px}.hero,.card{border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,.035));border-radius:24px;padding:16px;box-shadow:0 20px 60px rgba(0,0,0,.28)}.lead{color:#d6e0ec;line-height:1.45}.grid{display:grid;gap:12px}.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.kpi{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);border-radius:18px;padding:12px}.kpi span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em}.kpi b{font-size:28px;letter-spacing:-.06em}.pill{display:inline-flex;border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:7px 10px;color:#dce7f4;background:rgba(255,255,255,.05);font-size:12px;font-weight:800}.tabs{position:fixed;left:0;right:0;bottom:0;display:flex;gap:8px;overflow-x:auto;padding:10px 10px calc(10px + env(safe-area-inset-bottom));background:rgba(8,13,24,.94);border-top:1px solid rgba(255,255,255,.12);backdrop-filter:blur(18px)}button{border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--text);border-radius:999px;padding:10px 13px;font-size:15px;min-height:44px;font-weight:800}button.active{background:linear-gradient(135deg,var(--orange),var(--gold));color:#150f08}.list{display:grid;gap:10px}.row{display:flex;justify-content:space-between;gap:10px;align-items:center}.tag{font-size:11px;border-radius:999px;padding:5px 8px;border:1px solid rgba(119,196,255,.28);background:rgba(119,196,255,.12);color:#d8efff;font-weight:900}.bar{height:9px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;margin:8px 0 4px}.fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--gold))}.green{background:linear-gradient(90deg,#35d684,var(--green))}.red{background:linear-gradient(90deg,var(--red),#ffae73)}small{color:var(--muted)}.notice{border-color:rgba(255,199,95,.28);background:rgba(255,199,95,.09)}@media(min-width:760px){body{max-width:820px;margin:auto}.kpis{grid-template-columns:repeat(4,1fr)}}
+:root{color-scheme:dark;--bg:#06101d;--text:#f7f9fc;--muted:#9eacbd;--orange:#ff7f32;--gold:#ffc75f;--blue:#77c4ff}*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 12% 0,rgba(119,196,255,.22),transparent 30%),radial-gradient(circle at 100% 0,rgba(255,127,50,.22),transparent 28%),linear-gradient(180deg,#091525,var(--bg));font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text)}.loader{width:min(520px,100%);padding:26px;border-radius:30px;border:1px solid rgba(255,255,255,.13);background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.035));box-shadow:0 28px 80px rgba(0,0,0,.38)}.pill{display:inline-flex;padding:7px 10px;border:1px solid rgba(255,255,255,.14);border-radius:999px;background:rgba(255,255,255,.05);font-size:11px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;color:#e4edf7}h1{font-size:clamp(42px,12vw,68px);line-height:.88;letter-spacing:-.09em;margin:20px 0 14px}p{color:var(--muted);line-height:1.5;margin:0}.track{height:11px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;margin:24px 0 10px}.fill{height:100%;width:5%;border-radius:inherit;background:linear-gradient(90deg,var(--orange),var(--gold),var(--blue));transition:width .22s ease}.status{display:flex;justify-content:space-between;gap:12px;font-size:12px;color:#d9e4f0}.error{display:none;margin-top:18px;padding:14px;border:1px solid rgba(255,105,127,.35);border-radius:18px;background:rgba(255,105,127,.10);color:#ffdce2}.error button{width:100%;margin-top:12px;min-height:44px;border:0;border-radius:999px;background:linear-gradient(135deg,var(--orange),var(--gold));color:#1b1007;font-weight:900;font-size:15px}@media(prefers-reduced-motion:reduce){.fill{transition:none}}
 </style>
 </head>
 <body>
-<div id="app"></div>
-<div class="tabs" id="tabs"></div>
+<main class="loader">
+<span class="pill">No Promises · V28.3 Beta Polish</span>
+<h1>Building your program.</h1>
+<p>Loading the full mobile coach-manager, save tools, onboarding and beta testing center.</p>
+<div class="track"><div class="fill" id="fill"></div></div>
+<div class="status"><span id="status">Connecting…</span><b id="percent">5%</b></div>
+<div class="error" id="error"><b>We couldn’t load the beta.</b><br><span id="errorText"></span><button onclick="location.reload()">Try Again</button></div>
+</main>
 <script>
-const state={view:'Home',record:'0-0',prestige:58,budget:72,fan:61,facility:62,recruiting:67,development:64,revenue:74,health:70,pressure:34,projects:[['Arena / Home Court',2,18],['Practice Facility',2,16],['Recovery Center',1,14],['Academic Center',2,12],['NIL Studio',1,15],['Fan Experience',2,10]],schedule:[['TV Challenge','Neutral','Rating 82','Revenue 95'],['Rivalry Game','Home','Rating 76','Revenue 68'],['Road Test','Away','Rating 84','Resume 72'],['Buy Game','Home','Rating 64','Revenue 80']],notes:['V28 mobile shell pushed to GitHub.','Full V28 artifact remains packaged as the downloadable ZIP from ChatGPT.','Next deployment step: replace this lightweight shell with the full generated single-file HTML when direct file-body upload is available.']};
-const views=['Home','Facilities','Schedule','Recruiting','Performance','Notes'];
-function meter(label,val,bad){return `<div><div class="row"><small>${label}</small><b>${val}</b></div><div class="bar"><div class="fill ${bad?'red':val>69?'green':''}" style="width:${Math.max(0,Math.min(100,val))}%"></div></div></div>`}
-function Home(){return `<div class="grid"><section class="hero"><span class="pill">No Promises · V28 Mobile</span><h1>Coach the whole program from your phone.</h1><p class="lead">This mobile deployment keeps the V28 direction focused: facilities, scheduling, recruiting, health, staff, media pressure and long-term dynasty building.</p><div class="kpis"><div class="kpi"><span>Prestige</span><b>${state.prestige}</b></div><div class="kpi"><span>Budget</span><b>${state.budget}</b></div><div class="kpi"><span>Fanbase</span><b>${state.fan}</b></div><div class="kpi"><span>Pressure</span><b>${state.pressure}</b></div></div></section><section class="card notice"><h2>Deployment note</h2><p class="lead">I pushed a lightweight mobile launch file first. The complete V28 mobile-optimized ZIP is still the full build package from ChatGPT.</p></section></div>`}
-function Facilities(){return `<div class="grid"><section class="card"><h2>Facilities + Infrastructure</h2>${meter('Facility Score',state.facility)}${meter('Recruiting Bonus',state.recruiting)}${meter('Development Support',state.development)}${meter('Revenue Engine',state.revenue)}</section><section class="card"><h2>Projects</h2><div class="list">${state.projects.map(p=>`<div class="card"><div class="row"><b>${p[0]}</b><span class="tag">Level ${p[1]}</span></div><small>Upgrade cost ${p[2]} facility funds</small></div>`).join('')}</div></section></div>`}
-function Schedule(){return `<div class="grid"><section class="card"><h2>Schedule Strategy</h2>${meter('Strength of Schedule',71)}${meter('TV Exposure',76)}${meter('Travel Fatigue',28,true)}</section><section class="card"><h2>Event Slate</h2><div class="list">${state.schedule.map(g=>`<div class="card"><div class="row"><b>${g[0]}</b><span class="tag">${g[1]}</span></div><small>${g[2]} · ${g[3]}</small></div>`).join('')}</div></section></div>`}
-function Recruiting(){return `<div class="grid"><section class="card"><h2>Recruiting Class</h2>${meter('Class Score',78)}${meter('Position Need Fit',72)}${meter('NIL / Trust Risk',31,true)}</section><section class="card"><h2>Signing Day Read</h2><p class="lead">The facilities layer now supports recruiting credibility, NIL pitch quality, family trust and long-term roster building.</p></section></div>`}
-function Performance(){return `<div class="grid"><section class="card"><h2>Sports Performance</h2>${meter('Team Health',state.health)}${meter('Recovery Support',68)}${meter('Injury Risk',24,true)}</section><section class="card"><h2>Mobile UX</h2><p class="lead">Large tap targets, bottom nav, one-column cards, readable KPIs and phone-first spacing.</p></section></div>`}
-function Notes(){return `<section class="card"><h2>Push Notes</h2><div class="list">${state.notes.map(n=>`<div class="card">${n}</div>`).join('')}</div></section>`}
-function render(){document.getElementById('app').innerHTML=({Home,Facilities,Schedule,Recruiting,Performance,Notes}[state.view]||Home)();document.getElementById('tabs').innerHTML=views.map(v=>`<button class="${state.view===v?'active':''}" onclick="state.view='${v}';render()">${v}</button>`).join('')}
-render();
+(async()=>{
+ const count=21,base='no-promises-v28-3-beta/',fill=document.getElementById('fill'),status=document.getElementById('status'),percent=document.getElementById('percent');
+ const set=(n,t)=>{fill.style.width=n+'%';percent.textContent=Math.round(n)+'%';status.textContent=t};
+ try{
+  if(!('DecompressionStream' in window))throw new Error('This browser needs a current version of Safari, Chrome or Edge.');
+  set(8,'Downloading game data…');
+  const parts=[];
+  for(let i=0;i<count;i++){
+   const name=`part-${String(i).padStart(2,'0')}.txt`;
+   const response=await fetch(base+name+'?build=28.3.1',{cache:'no-store'});
+   if(!response.ok)throw new Error(`Missing game section ${i+1} of ${count}.`);
+   parts.push((await response.text()).trim());
+   set(8+70*((i+1)/count),`Downloading section ${i+1} of ${count}…`);
+  }
+  set(82,'Unpacking the program…');
+  const binary=atob(parts.join('')),bytes=new Uint8Array(binary.length);
+  for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+  const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+  const html=await new Response(stream).text();
+  if(!html.includes('V28.3')||!html.includes('Beta Test'))throw new Error('The downloaded build did not pass integrity checks.');
+  set(98,'Starting your dynasty…');
+  document.open();document.write(html);document.close();
+ }catch(err){
+  console.error(err);set(100,'Load failed');document.getElementById('errorText').textContent=err.message;document.getElementById('error').style.display='block';
+ }
+})();
 </script>
 </body>
 </html>
