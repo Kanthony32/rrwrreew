@@ -22,20 +22,30 @@
 (async()=>{
  const count=21,base='no-promises-v28-3-beta/',fill=document.getElementById('fill'),status=document.getElementById('status'),percent=document.getElementById('percent');
  const set=(n,t)=>{fill.style.width=n+'%';percent.textContent=Math.round(n)+'%';status.textContent=t};
+ const decodePart=(value,index)=>{
+  const clean=value.replace(/\s+/g,'');
+  if(!/^[A-Za-z0-9+/]*={0,2}$/.test(clean))throw new Error(`Game section ${index+1} contains invalid data.`);
+  const binary=atob(clean),bytes=new Uint8Array(binary.length);
+  for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+  return bytes;
+ };
  try{
   if(!('DecompressionStream' in window))throw new Error('This browser needs a current version of Safari, Chrome or Edge.');
   set(8,'Downloading game data…');
-  const parts=[];
+  const chunks=[];
+  let totalLength=0;
   for(let i=0;i<count;i++){
    const name=`part-${String(i).padStart(2,'0')}.txt`;
-   const response=await fetch(base+name+'?build=28.3.1',{cache:'no-store'});
+   const response=await fetch(base+name+'?build=28.3.2',{cache:'no-store'});
    if(!response.ok)throw new Error(`Missing game section ${i+1} of ${count}.`);
-   parts.push((await response.text()).trim());
+   const chunk=decodePart(await response.text(),i);
+   chunks.push(chunk);totalLength+=chunk.length;
    set(8+70*((i+1)/count),`Downloading section ${i+1} of ${count}…`);
   }
   set(82,'Unpacking the program…');
-  const binary=atob(parts.join('')),bytes=new Uint8Array(binary.length);
-  for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+  const bytes=new Uint8Array(totalLength);
+  let offset=0;
+  for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.length;}
   const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
   const html=await new Response(stream).text();
   if(!html.includes('V28.3')||!html.includes('Beta Test'))throw new Error('The downloaded build did not pass integrity checks.');
