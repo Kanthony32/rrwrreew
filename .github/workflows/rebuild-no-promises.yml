@@ -1,0 +1,40 @@
+name: Rebuild No Promises static site
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - no-promises-v28-mobile-deploy
+    paths:
+      - tools/rebuild_game.py
+      - .github/workflows/rebuild-no-promises.yml
+
+permissions:
+  contents: write
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: no-promises-v28-mobile-deploy
+          fetch-depth: 0
+
+      - name: Reconstruct and split the game
+        run: python tools/rebuild_game.py
+
+      - name: Validate generated JavaScript
+        run: node --check no-promises-v28-3-static/app.js
+
+      - name: Commit plain static build
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add no-promises-v28-mobile.html no-promises-v28-3-static/
+          if git diff --cached --quiet; then
+            echo "No generated changes to commit."
+          else
+            git commit -m "Publish plain No Promises V28.3 static build"
+            git push origin HEAD:no-promises-v28-mobile-deploy
+          fi
