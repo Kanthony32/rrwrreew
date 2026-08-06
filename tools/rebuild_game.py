@@ -134,4 +134,5 @@ def main() -> int:
 
 
 if __name__ == "__main__":
+    # Deployment retrigger: 2026-08-06 static build publish.
     sys.exit(main())
