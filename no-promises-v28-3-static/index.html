@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>No Promises — Beta Polish V28.3</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="beta-ready">
+<div class="beta-splash" id="betaSplash"><div class="splash-lockup"><div class="splash-mark">NP</div><b>No Promises</b><small>Preparing your program...</small><div class="splash-loader"></div></div></div>
+<div class="save-indicator" id="saveIndicator"><span class="dot"></span><span id="saveText">Autosave ready</span></div>
+<div class="toast-stack" id="toastStack" aria-live="polite"></div>
+<input type="file" id="saveImportInput" accept="application/json,.json" hidden onchange="importSaveFile(event)">
+<div class="app">
+  <div class="top">
+    <div class="hero">
+      <div class="pill">No Promises · V28.3 Beta</div>
+      <h1>No Promises</h1>
+      <div class="lead">College basketball coach-manager: select a program, manage rotations, build game plans, recruit honestly, survive the media, manage the locker room, build a weekly practice plan, manage injuries and recovery, handle boosters, navigate March, and rebuild every offseason.</div>
+    </div>
+    <div class="hero-meta">
+      <div class="meta-grid">
+        <div class="meta-card"><span>Build</span><b>V28.3</b></div>
+        <div class="meta-card"><span>New</span><b>Beta Polish</b></div>
+        <div class="meta-card"><span>Season</span><b>12 Games</b></div>
+        <div class="meta-card"><span>Core</span><b>Trust</b></div>
+      </div>
+    </div>
+  </div>
+  <div class="stagebar" id="stagebar"></div>
+  <div class="nav" id="nav"></div>
+  <main id="main"></main>
+</div>
+<div class="modal" id="modal"><div class="card box"><button class="close danger" onclick="closeModal()">Close</button><div id="modalBody"></div></div></div>
+<script src="js/app-00.js"></script>
+<script src="js/app-01.js"></script>
+<script src="js/app-02.js"></script>
+<script src="js/app-03.js"></script>
+<script src="js/app-04.js"></script>
+<script src="js/app-05.js"></script>
+</body>
+</html>
