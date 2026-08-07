@@ -37,3 +37,5 @@ jobs:
             git commit -m "Publish plain No Promises V28.3 static build"
             git push origin HEAD:no-promises-v28-mobile-deploy
           fi
+
+# Retriggered 2026-08-07 after static beta validation.
